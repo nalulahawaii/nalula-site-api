@@ -162,12 +162,12 @@ export default {
 
 const sendEmail = async ({ name, email }, clickUrls) => {
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
     secure: true,
     auth: {
-      user: "hello@nalula.com",
-      pass: "9998b526642dfe3d88f366208884aa61!!",
+      user: process.env.SMTP_USERNAME,
+      pass: process.env.SMTP_PASSWORDs,
     },
   });
   let htmlText = "";
