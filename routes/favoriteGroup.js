@@ -24,4 +24,4 @@ router.get("/:id", async (req, res) => {
     favorites,
   });
 });
-module.exports = router;
+export default router;

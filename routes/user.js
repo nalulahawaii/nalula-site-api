@@ -1,4 +1,5 @@
-"use strict";
+import { esBulk } from '../services/elasticsearch'
+
 const router = require("express").Router();
 const { sendJson } = require("../util");
 const User = require("../models/user");
@@ -6,7 +7,6 @@ const Favorite = require("../models/favorite");
 const FavoriteGroup = require("../models/favoriteGroup");
 const Message = require("../models/message");
 const Search = require("../models/search");
-const { esBulk } = require("../util");
 const moment = require("moment");
 
 const insertSearchES = async (esQuery, userId, _id) => {
@@ -291,4 +291,4 @@ router.delete("/:id", async (req, res) => {
   sendJson(res, users);
 });
 
-module.exports = router;
+export default router;

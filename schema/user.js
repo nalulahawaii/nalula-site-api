@@ -11,4 +11,4 @@ const UserSchema = new mongoose.Schema({
   sub: String,
   loginCount: Number,
 });
-module.exports = UserSchema;
+export default UserSchema;

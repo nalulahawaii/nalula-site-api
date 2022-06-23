@@ -1,2 +1,2 @@
 "use strict";
-module.exports = [require("./search")];
+export default [require("./search")];

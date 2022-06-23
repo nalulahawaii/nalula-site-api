@@ -1,13 +1,13 @@
-"use strict";
+import { esClient, esBulk } from 'services/elasticsearch'
+
 const User = require("../models/user");
 const Search = require("../models/search");
 const Message = require("../models/message");
 const nodemailer = require("nodemailer");
-const { esClient, esBulk } = require("../util");
 const esb = require("elastic-builder");
 const moment = require("moment");
 
-module.exports = {
+export default {
   times: ["1 0 8 * * *", "1 0 20 * *"], // 8:01 am, 8:01pm
   func: async () => {
     console.log("CronJob: saved search");

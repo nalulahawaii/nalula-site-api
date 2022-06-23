@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-module.exports = new mongoose.Schema(
+export default new mongoose.Schema(
   {
     creatorId: mongoose.Schema.Types.ObjectId,
     name: String,

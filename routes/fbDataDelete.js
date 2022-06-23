@@ -57,4 +57,4 @@ const parseSignedRequest = (signedRequest, secret) => {
   }
   return data;
 };
-module.exports = router;
+export default router;

@@ -1,7 +1,9 @@
-const { CronJob } = require("cron");
-const crons = require("./index");
+import cron from 'node-cron'
+import _ from 'lodash'
 
-module.exports = function startCrons() {
+const log = require('log4js').getLogger('Workers')
+
+export default function startCrons() {
 
   Object.keys(crons).forEach((key) => {
     const cron = crons[key];

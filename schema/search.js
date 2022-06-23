@@ -10,4 +10,4 @@ const SearchSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-module.exports = SearchSchema;
+export default SearchSchema;
