@@ -1,7 +1,8 @@
 import cron from 'node-cron'
 import _ from 'lodash'
+import { newLogger } from 'src/services/logging'
 
-const log = require('log4js').getLogger('Workers')
+const log = newLogger('Workers')
 
 export default function startCrons() {
 

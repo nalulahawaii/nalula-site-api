@@ -3,11 +3,11 @@ import { esBulk } from 'src/services/elasticsearch'
 
 import express from 'express'
 import { sendJson } from 'src/util'
-import User from 'src/models/user'
-import Favorite from 'src/models/favorite'
-import FavoriteGroup from 'src/models/favoriteGroup'
-import Message from 'src/models/message'
-import Search from 'src/models/search'
+import User from 'src/db/mongo/models/user'
+import Favorite from 'src/db/mongo/models/favorite'
+import FavoriteGroup from 'src/db/mongo/models/favoriteGroup'
+import Message from 'src/db/mongo/models/message'
+import Search from 'src/db/mongo/models/search'
 
 const router = express.Router()
 
@@ -235,7 +235,7 @@ router.post('/', async (req, res) => {
     if(!user) {
       user = await User.create({ ...body.user })
       const group = await FavoriteGroup.create({
-        creatorId: user._id,
+        creator: user,
         name: 'Favorites',
       })
     } else {
@@ -248,25 +248,21 @@ router.post('/', async (req, res) => {
       creatorId: user._id,
     })
     const incomingMessages = await Message.find({
-      recieverId: user._id,
+      receiverId: user._id,
       viewDate: null,
     })
     const savedSearches = await Search.find({
       creatorId: user._id,
     })
-    const favoriteGroups = favGroups.map((favGroup) => {
-      return {
+    const favoriteGroups = favGroups.map((favGroup) => ({
         ...favGroup._doc,
         favoriteIndices: favorites
-          .map((fav, i) => {
-            return fav.groupId &&
+          .map((fav, i) => fav.groupId &&
             fav.groupId.toString() == favGroup._id.toString()
               ? i
-              : null
-          })
+              : null)
           .filter((idx) => idx !== null),
-      }
-    })
+      }))
     sendJson(res, {
       user,
       favorites,

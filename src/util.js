@@ -1,3 +1,5 @@
+import { Schema } from 'mongoose'
+
 // TODO: replace with 'got' templates
 const addCorsHeaders = (res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -21,3 +23,7 @@ export const sendError = (res, results) => {
   res.status(400).error(results)
 }
 
+export const getMongooseRef = modelName => ({
+  type: Schema.Types.ObjectId,
+  ref: modelName,
+})

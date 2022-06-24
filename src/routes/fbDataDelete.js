@@ -3,7 +3,7 @@
 var crypto = require('crypto')
 const router = require('express').Router()
 const { sendJson } = require('src/util')
-import User from 'src/models/user'
+import User from 'src/db/mongo/models/user'
 
 router.post('/', async (req, res) => {
   const {
