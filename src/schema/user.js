@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose'
 const UserSchema = new mongoose.Schema({
   email: String,
   email_verified: String,
@@ -10,5 +10,5 @@ const UserSchema = new mongoose.Schema({
   picture: String,
   sub: String,
   loginCount: Number,
-});
-export default UserSchema;
+})
+export default UserSchema

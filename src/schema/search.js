@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose'
 const SearchSchema = new mongoose.Schema(
   {
     isInternalNotify: Boolean,
@@ -8,6 +8,6 @@ const SearchSchema = new mongoose.Schema(
     creatorId: mongoose.Schema.Types.ObjectId,
     notifyDate: Date,
   },
-  { timestamps: true }
-);
-export default SearchSchema;
+  { timestamps: true },
+)
+export default SearchSchema

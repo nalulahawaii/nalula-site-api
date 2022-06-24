@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose'
 const MessageSchema = new mongoose.Schema(
   {
     senderId: mongoose.Schema.Types.ObjectId,
@@ -7,6 +7,6 @@ const MessageSchema = new mongoose.Schema(
     viewDate: Date,
     data: String,
   },
-  { timestamps: true }
-);
-export default MessageSchema;
+  { timestamps: true },
+)
+export default MessageSchema

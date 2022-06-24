@@ -1,14 +1,13 @@
-"use strict";
-const router = require("express").Router();
-const { sendJson } = require("../util");
-const Favorite = require("../models/favorite");
-const FavoriteGroup = require("../models/favoriteGroup");
+const router = require('express').Router()
+import { sendJson }  from 'src/util'
+import Favorite from 'src/models/favorite'
+import FavoriteGroup from 'src/models/favoriteGroup'
 
-router.get("/:id", async (req, res) => {
-  const favoriteGroup = await FavoriteGroup.findById(req.params.id);
+router.get('/:id', async (req, res) => {
+  const favoriteGroup = await FavoriteGroup.findById(req.params.id)
   const favorites = favoriteGroup
     ? await Favorite.find({ groupId: favoriteGroup._id })
-    : null;
+    : null
 
   sendJson(res, {
     favoriteGroup: {
@@ -17,11 +16,11 @@ router.get("/:id", async (req, res) => {
         .map((fav, i) => {
           return fav.groupId.toString() == favoriteGroup._id.toString()
             ? i
-            : null;
+            : null
         })
         .filter((idx) => idx !== null),
     },
     favorites,
-  });
-});
-export default router;
+  })
+})
+export default router

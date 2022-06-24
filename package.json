@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon src/server.js",
     "start": "NODE_ENV=production node dist/server",
     "transpile": "babel ./src --copy-files **/config.json --out-dir dist",
     "clean": "rimraf dist",
