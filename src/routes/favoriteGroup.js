@@ -1,7 +1,8 @@
-const router = require('express').Router()
-import { sendJson }  from 'src/util'
+import { sendJson } from 'src/util'
 import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup'
+
+const router = require('express').Router()
 
 router.get('/:id', async (req, res) => {
   const favoriteGroup = await FavoriteGroup.findById(req.params.id)
@@ -13,11 +14,9 @@ router.get('/:id', async (req, res) => {
     favoriteGroup: {
       ...favoriteGroup._doc,
       favoriteIndices: favorites
-        .map((fav, i) => {
-          return fav.groupId.toString() == favoriteGroup._id.toString()
+        .map((fav, i) => fav.groupId.toString() == favoriteGroup._id.toString()
             ? i
-            : null
-        })
+            : null)
         .filter((idx) => idx !== null),
     },
     favorites,

@@ -47,11 +47,11 @@ app.use('/favoriteGroup', require('src/routes/favoriteGroup'))
 app.use('/user', require('src/routes/user'))
 
 if(app.get('env') === 'development') {
-  app.use(function (err, req, res, next) {
+  app.use((err, req, res, next) => {
     res.status(500).json(err.stack)
   })
 } else {
-  app.use(function (err, req, res, next) {
+  app.use((err, req, res, next) => {
     res.status(500).json(err.message)
   })
 }
