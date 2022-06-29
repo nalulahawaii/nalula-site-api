@@ -1,6 +1,6 @@
 const router = require('express').Router()
 import { sendJson }  from 'src/util'
-import Favorite from 'src/db/mongo/models/favorite'
+import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup'
 
 router.get('/:id', async (req, res) => {

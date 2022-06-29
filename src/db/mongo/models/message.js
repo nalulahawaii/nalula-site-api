@@ -2,7 +2,7 @@ import {
   model,
   Schema,
 } from 'mongoose'
-import { getMongooseRef } from 'src/util'
+import { getMongooseRef } from 'src/util/mongoose'
 
 const schema = Schema(
   {

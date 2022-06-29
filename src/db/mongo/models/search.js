@@ -2,7 +2,7 @@ import {
   model,
   Schema,
 } from 'mongoose'
-import { getMongooseRef } from 'src/util'
+import { getMongooseRef } from 'src/util/mongoose'
 
 const schema = Schema(
   {
@@ -10,7 +10,7 @@ const schema = Schema(
     isEmailNotify: Boolean,
     clickUrl: String,
     clickText: String,
-    creatorId: getMongooseRef('User'),
+    creator: getMongooseRef('User'),
     notifyDate: Date,
   },
   { timestamps: true },
