@@ -59,13 +59,13 @@ const applyModifications = async (modifications, user) => {
       const { action, data } = mod
       if(action === 'insert') {
         lastGroupUpdated = await FavoriteGroup.create({
-          creatorId: user._id,
+          creator: user,
           ...data,
         })
       } else if(action === 'update') {
         lastGroupUpdated = await FavoriteGroup.findOneAndUpdate(
           { _id: data._id },
-          { ...data, creatorId: user._id },
+          { ...data, creator: user },
           {
             new: true,
             upsert: true,
@@ -97,7 +97,7 @@ const applyModifications = async (modifications, user) => {
           },
           {
             ...data,
-            creatorId: user._id,
+            creator: user,
             groupId:
               data.groupId || (lastGroupUpdated ? lastGroupUpdated._id : null),
           },
@@ -116,7 +116,7 @@ const applyModifications = async (modifications, user) => {
           },
           {
             ...data,
-            creatorId: user._id,
+            creator: user,
             groupId:
               data.groupId || (lastGroupUpdated ? lastGroupUpdated._id : null),
           },
@@ -197,7 +197,7 @@ const applyModifications = async (modifications, user) => {
           },
           {
             ...data,
-            creatorId: user._id,
+            creator: user,
             notifyDate: moment().format('YYYY-MM-DD[T]HH:mm:ss'),
           },
           {
@@ -243,26 +243,26 @@ router.post('/', async (req, res) => {
       user.save()
     }
     await applyModifications(body.modifications, user)
-    const favorites = await Favorite.find({ creatorId: user._id })
+    const favorites = await Favorite.find({ creator: user })
     const favGroups = await FavoriteGroup.find({
-      creatorId: user._id,
+      creator: user,
     })
     const incomingMessages = await Message.find({
       receiverId: user._id,
       viewDate: null,
     })
     const savedSearches = await Search.find({
-      creatorId: user._id,
+      creator: user,
     })
     const favoriteGroups = favGroups.map((favGroup) => ({
-        ...favGroup._doc,
-        favoriteIndices: favorites
-          .map((fav, i) => fav.groupId &&
-            fav.groupId.toString() == favGroup._id.toString()
-              ? i
-              : null)
-          .filter((idx) => idx !== null),
-      }))
+      ...favGroup._doc,
+      favoriteIndices: favorites
+        .map((fav, i) => fav.groupId &&
+        fav.groupId.toString() == favGroup._id.toString()
+          ? i
+          : null)
+        .filter((idx) => idx !== null),
+    }))
     sendJson(res, {
       user,
       favorites,
