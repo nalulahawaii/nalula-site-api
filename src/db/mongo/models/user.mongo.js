@@ -16,4 +16,6 @@ const schema = new Schema({
   loginCount: Number,
 })
 
+schema.index({ sub: 1 })
+
 export default model('User', schema)

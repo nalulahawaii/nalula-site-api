@@ -78,7 +78,7 @@ const applyModifications = async (modifications, user) => {
         const group = await FavoriteGroup.findByIdAndDelete(data._id, {
           useFindAndModify: false,
         })
-        await Favorite.deleteMany({ groupId: group._id })
+        await Favorite.deleteMany({ group })
       }
     })
     if(promises.length) {
@@ -93,13 +93,12 @@ const applyModifications = async (modifications, user) => {
         await Favorite.findOneAndUpdate(
           {
             listingId: data.listingId,
-            groupId: data.groupId,
+            group: data.group,
           },
           {
             ...data,
             creator: user,
-            groupId:
-              data.groupId || (lastGroupUpdated ? lastGroupUpdated._id : null),
+            group: data.group || lastGroupUpdated?._id,
           },
           {
             new: true,
@@ -117,8 +116,7 @@ const applyModifications = async (modifications, user) => {
           {
             ...data,
             creator: user,
-            groupId:
-              data.groupId || (lastGroupUpdated ? lastGroupUpdated._id : null),
+            group: data.group || lastGroupUpdated?._id,
           },
           {
             new: true,

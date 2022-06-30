@@ -6,7 +6,7 @@ import { getMongooseRef } from 'src/util/mongoose'
 
 const schema = Schema(
   {
-    senderId: getMongooseRef('User'),
+    sender: getMongooseRef('User'),
     receiverId: getMongooseRef('User'),
     text: String,
     viewDate: Date,

@@ -7,7 +7,7 @@ import { getMongooseRef } from 'src/util/mongoose'
 const schema = new Schema(
   {
     creator: getMongooseRef('User'),
-    groupId: getMongooseRef('FavoriteGroup'),
+    group: getMongooseRef('FavoriteGroup'),
     listingId: String,
   },
   { timestamps: true },
