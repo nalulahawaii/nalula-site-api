@@ -268,8 +268,8 @@ router.delete('/:id', async (req, res) => {
   const {
     params: { id },
   } = req
-  await FavoriteGroup.deleteMany({ creatorId: id })
-  await Favorite.deleteMany({ creatorId: id })
+  await FavoriteGroup.deleteMany({ creator: id })
+  await Favorite.deleteMany({ creator: id })
   const users = await User.findByIdAndDelete(id)
 
   sendJson(res, users)

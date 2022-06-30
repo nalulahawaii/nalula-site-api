@@ -17,4 +17,5 @@ const schema = Schema(
 )
 
 schema.index({ notifyDate: 1 })
+schema.index({ clickUrl: 1 })
 export default model('Search', schema)
