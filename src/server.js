@@ -5,8 +5,6 @@ import userRt from 'src/routes/user'
 import { newLogger } from 'src/services/logging'
 import { Db } from 'src/db/mongo/mongoose'
 import { initWorkers } from 'src/workers'
-// import 'core-js/stable'
-// import 'regenerator-runtime/runtime'
 
 const log = newLogger('Server')
 
