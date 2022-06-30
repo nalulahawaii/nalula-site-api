@@ -1,23 +1,25 @@
 import glob from 'glob'
 import mongoose from 'mongoose'
 import path from 'path'
-import { config } from '../../config'
 
 const log = require('log4js').getLogger('Db')
 
 log.level = 'info'
 
 const root = process.cwd()
-const MONGOOSE_SCHEMA_PATTERN = config.env === 'development' ? 'src/**/*.mongo.js' : 'dist/**/*.mongo.js'
 
 class Db {
-  static async connect (mongoUri = config.mongodb.uri) {
+  static async connect (mongoUri = process.env.MONGODB_URI) {
     log.info('Connecting to Mongo Database')
-    log.info(`Mongoose version ${mongoose.version}`)
+    log.info(`Mongoose Version ${mongoose.version}`)
 
-    await mongoose.connect(mongoUri, {})
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    })
 
-    const modelFiles = glob.sync(MONGOOSE_SCHEMA_PATTERN)
+    const modelFiles = glob.sync('src/**/*.mongo.js')
 
     modelFiles.forEach((file) => {
       const filePath = path.join(root, '/', file)

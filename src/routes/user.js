@@ -3,11 +3,11 @@ import { esBulk } from 'src/services/elasticsearch'
 
 import express from 'express'
 import { sendJson } from 'src/util'
-import User from 'src/db/mongo/models/user'
+import User from 'src/db/mongo/models/user.mongo'
 import Favorite from 'src/db/mongo/models/favorite.mongo'
-import FavoriteGroup from 'src/db/mongo/models/favoriteGroup'
-import Message from 'src/db/mongo/models/message'
-import Search from 'src/db/mongo/models/search'
+import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
+import Message from 'src/db/mongo/models/message.mongo'
+import Search from 'src/db/mongo/models/search.mongo'
 
 const router = express.Router()
 
@@ -147,7 +147,7 @@ const applyModifications = async (modifications, user) => {
           },
           {
             ...data,
-            senderId: user._id,
+            sender: user._id,
           },
           {
             new: true,
@@ -164,7 +164,7 @@ const applyModifications = async (modifications, user) => {
           },
           {
             ...data,
-            senderId: user._id,
+            sender: user._id,
           },
           {
             new: true,
@@ -255,8 +255,7 @@ router.post('/', async (req, res) => {
     const favoriteGroups = favGroups.map((favGroup) => ({
       ...favGroup._doc,
       favoriteIndices: favorites
-        .map((fav, i) => fav.groupId &&
-        fav.groupId.toString() == favGroup._id.toString()
+        .map((fav, i) => fav.group && fav.group.toString() === favGroup._id.toString()
           ? i
           : null)
         .filter((idx) => idx !== null),
