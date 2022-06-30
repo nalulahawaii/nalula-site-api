@@ -1,6 +1,6 @@
 // TODO: replace with 'got' templates
 const addCorsHeaders = (res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Origin', 'https://nalula.com/')
   res.setHeader(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept',
