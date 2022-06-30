@@ -63,8 +63,8 @@ const applyModifications = async (modifications, user) => {
           ...data,
         })
       } else if(action === 'update') {
-        lastGroupUpdated = await FavoriteGroup.findOneAndUpdate(
-          { _id: data._id },
+        lastGroupUpdated = await FavoriteGroup.findByIdAndUpdate(
+          data._id,
           { ...data, creator: user },
           {
             new: true,
@@ -141,10 +141,8 @@ const applyModifications = async (modifications, user) => {
       const { action, data } = mod
 
       if(action === 'insert') {
-        await Message.findOneAndUpdate(
-          {
-            _id: data._id,
-          },
+        await Message.findByIdAndUpdate(
+          data._id,
           {
             ...data,
             sender: user._id,
@@ -158,10 +156,8 @@ const applyModifications = async (modifications, user) => {
           },
         )
       } else if(action === 'update') {
-        await Message.findOneAndUpdate(
-          {
-            _id: data._id,
-          },
+        await Message.findByIdAndUpdate(
+          data._id,
           {
             ...data,
             sender: user._id,
