@@ -15,10 +15,6 @@ export const esBulk = async (str) => {
     log.error(`Error parsing JSON for esBulk: "${str}"`, e)
     return false
   }
-  if(!esClient) {
-    log.error('no client provided!')
-    return false
-  }
   const res = await esClient.bulk({
     body: json,
     refresh: 'wait_for',
