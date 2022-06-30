@@ -6,13 +6,13 @@ import {
 import nodemailer from 'nodemailer'
 import esb from 'elastic-builder'
 import moment from 'moment'
-import User from 'src/db/mongo/models/user'
-import Search from 'src/db/mongo/models/search'
-import Message from 'src/db/mongo/models/message'
-
-import tryToCatch from 'try-to-catch'
+import User from 'src/db/mongo/models/user.mongo'
+import Search from 'src/db/mongo/models/search.mongo'
+import Message from 'src/db/mongo/models/message.mongo'
 import { reportError } from 'src/util/error-handling'
 import { newLogger } from 'src/services/logging'
+
+import _ from 'lodash'
 
 const log = newLogger('Searches Worker')
 
@@ -23,17 +23,20 @@ const queryAsJSON = esb
   .toJSON()
 
 const getChangesHits = async () => {
-  const [err, results] = await tryToCatch(esClient.search, {
-    index: 'listing-query-000001',
-    body: queryAsJSON,
-  })
-  if(err) return repErr({
-    e: err,
-    operation: 'retrieve changes from elasticsearch',
-  })
-  const hits = results?.body?.hits?.hits || []
-  log.debug('hit count', hits.length)
-  return hits
+  try {
+    const results = await esClient.search({
+      index: 'listing-query-000001',
+      body: queryAsJSON,
+    })
+    const hits = results?.body?.hits?.hits || []
+    log.debug('hit count', hits.length)
+    return hits
+  } catch (e) {
+    return repErr({
+      e: e.meta.body.error,
+      operation: 'Retrieve changes from ElasticSearch',
+    })
+  }
 }
 
 const worker = async () => {
@@ -210,7 +213,8 @@ const repErr = ({ e, operation, extra }) => {
 export default {
   name: 'Search Updates',
   message: 'Sending Notification of Changes to Saved Searches.',
-  schedule: ['1 0 8 * * *', '1 0 20 * *'], // 8:01 am, 8:01pm
+  schedule: '1 8,20 * * *', // 8:01 am, 8:01pm
   worker,
   immediate: true,
+  enabled: true,
 }
