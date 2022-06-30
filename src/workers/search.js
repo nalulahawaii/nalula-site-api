@@ -102,10 +102,8 @@ const worker = async () => {
       const userSearches = {}
       let id
       searches.forEach((search) => {
-        id = search.creatorId.toString()
-        if(!userSearches[id]) {
-          userSearches[id] = []
-        }
+        id = search.creator._id
+        if(!userSearches[id]) userSearches[id] = []
         userSearches[id].push(search)
       })
       log.debug('userSearches', userSearches)

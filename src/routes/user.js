@@ -2,7 +2,10 @@ import moment from 'moment'
 import { esBulk } from 'src/services/elasticsearch'
 
 import express from 'express'
-import { sendJson } from 'src/util'
+import {
+  sendError,
+  sendJson,
+} from 'src/util'
 import User from 'src/db/mongo/models/user.mongo'
 import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
@@ -59,7 +62,10 @@ const applyModifications = async (modifications, user) => {
     } else if(action === 'update') {
       lastGroupUpdated = await FavoriteGroup.findByIdAndUpdate(
         data._id,
-        { ...data, creator: user },
+        {
+          ...data,
+          creator: user,
+        },
         {
           new: true,
           upsert: true,
@@ -217,46 +223,42 @@ router.post('/', async (req, res) => {
   const { body } = req
   if(!body.user) {
     sendError(res, ['No user supplied'])
-  } else {
-    let user = await User.findOne({ sub: body.user.sub })
-    if(!user) {
-      user = await User.create({ ...body.user })
-      const group = await FavoriteGroup.create({
-        creator: user,
-        name: 'Favorites',
-      })
-    } else {
-      user.loginCount = body.user.loginCount
-    await user.save()
-    }
-    await applyModifications(body.modifications, user)
-    const favorites = await Favorite.find({ creator: user })
-    const favGroups = await FavoriteGroup.find({
-      creator: user,
-    })
-    const incomingMessages = await Message.find({
-      receiver: user,
-      viewDate: null,
-    })
-    const savedSearches = await Search.find({
-      creator: user,
-    })
-    const favoriteGroups = favGroups.map((favGroup) => ({
-      ...favGroup._doc,
-      favoriteIndices: favorites
-        .map((fav, i) => fav.group && fav.group.toString() === favGroup._id.toString()
-          ? i
-          : null)
-        .filter((idx) => idx !== null),
-    }))
-    sendJson(res, {
-      user,
-      favorites,
-      favoriteGroups,
-      incomingMessages,
-      savedSearches,
-    })
+    return
   }
+  let user = await User.findOne({ sub: body.user.sub })
+  if(!user) {
+    user = await User.create({ ...body.user })
+    await FavoriteGroup.create({
+      creator: user,
+      name: 'Favorites',
+    })
+  } else {
+    user.loginCount = body.user.loginCount
+    await user.save()
+  }
+  await applyModifications(body.modifications, user)
+  const favorites = await Favorite.find({ creator: user })
+  const favGroups = await FavoriteGroup.find({ creator: user })
+  const incomingMessages = await Message.find({
+    receiver: user,
+    viewDate: null,
+  })
+  const savedSearches = await Search.find({ creator: user })
+  const favoriteGroups = favGroups.map((favGroup) => ({
+    ...favGroup._doc,
+    favoriteIndices: favorites
+      .map((fav, i) => fav.group && fav.group.toString() === favGroup._id.toString()
+        ? i
+        : null)
+      .filter((idx) => idx !== null),
+  }))
+  sendJson(res, {
+    user,
+    favorites,
+    favoriteGroups,
+    incomingMessages,
+    savedSearches,
+  })
 })
 
 // router.get("/", async (req, res) => {
