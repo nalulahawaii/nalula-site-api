@@ -1,9 +1,6 @@
-'use strict'
-
-var crypto = require('crypto')
+const crypto = require('crypto')
 const router = require('express').Router()
 const { sendJson } = require('src/util')
-import User from 'src/db/mongo/models/user'
 
 router.post('/', async (req, res) => {
   const {
@@ -16,7 +13,7 @@ router.post('/', async (req, res) => {
   )
 
   // Start data deletion
-  //const users = await User.findByIdAndDelete(id);
+  // const users = await User.findByIdAndDelete(id);
 
   const statusUrl = 'https://www.<your_website>.com/deletion?id=abc123' // URL to track the deletion
   const confirmationCode = 'abc123' // unique code for the deletion request
@@ -32,7 +29,7 @@ const base64decode = (data) => {
     data += '='
   }
   data = data.replace(/-/g, '+').replace(/_/g, '/')
-  return new Buffer(data, 'base64').toString('utf-8')
+  return Buffer.from(data, 'base64').toString('utf-8')
 }
 
 const parseSignedRequest = (signedRequest, secret) => {
@@ -42,7 +39,7 @@ const parseSignedRequest = (signedRequest, secret) => {
   const data = JSON.parse(json)
   if(!data.algorithm || data.algorithm.toUpperCase() != 'HMAC-SHA256') {
     throw Error(
-      'Unknown algorithm: ' + data.algorithm + '. Expected HMAC-SHA256',
+      `Unknown algorithm: ${data.algorithm}. Expected HMAC-SHA256`,
     )
   }
   const expected_sig = crypto
@@ -53,7 +50,7 @@ const parseSignedRequest = (signedRequest, secret) => {
     .replace(/\//g, '_')
     .replace('=', '')
   if(sig !== expected_sig) {
-    throw Error('Invalid signature: ' + sig + '. Expected ' + expected_sig)
+    throw Error(`Invalid signature: ${sig}. Expected ${expected_sig}`)
   }
   return data
 }
