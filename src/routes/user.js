@@ -242,7 +242,7 @@ router.post('/', async (req, res) => {
       creator: user,
     })
     const incomingMessages = await Message.find({
-      receiverId: user._id,
+      receiver: user,
       viewDate: null,
     })
     const savedSearches = await Search.find({
