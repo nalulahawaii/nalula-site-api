@@ -10,10 +10,11 @@ const schema = Schema(
     isEmailNotify: Boolean,
     clickUrl: String,
     clickText: String,
-    creator: getMongooseRef('User'),
+    creator: getMongooseRef('User', true),
     notifyDate: Date,
   },
   { timestamps: true },
 )
 
+schema.index({ notifyDate: 1 })
 export default model('Search', schema)

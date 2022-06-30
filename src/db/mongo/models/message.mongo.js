@@ -7,7 +7,7 @@ import { getMongooseRef } from 'src/util/mongoose'
 const schema = Schema(
   {
     sender: getMongooseRef('User'),
-    receiverId: getMongooseRef('User'),
+    receiver: getMongooseRef('User', true),
     text: String,
     viewDate: Date,
     data: String,
@@ -15,4 +15,5 @@ const schema = Schema(
   { timestamps: true },
 )
 
+schema.index({ viewDate: 1 })
 export default model('Message', schema)

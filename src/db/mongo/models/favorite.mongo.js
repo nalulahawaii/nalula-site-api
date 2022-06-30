@@ -6,14 +6,13 @@ import { getMongooseRef } from 'src/util/mongoose'
 
 const schema = new Schema(
   {
-    creator: getMongooseRef('User'),
-    group: getMongooseRef('FavoriteGroup'),
+    creator: getMongooseRef('User', true),
+    group: getMongooseRef('FavoriteGroup', true),
     listingId: String,
   },
   { timestamps: true },
 )
 
-schema.index({ creator: 1 })
-schema.index({ group: 1, listing: 1 })
+schema.index({ listingId: 1 })
 
 export default model('Favorite', schema)

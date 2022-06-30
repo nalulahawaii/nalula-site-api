@@ -13,4 +13,5 @@ const schema = new Schema(
   { timestamps: true },
 )
 
+schema.index({ creator: 1 })
 export default model('FavoriteGroup', schema)
