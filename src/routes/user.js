@@ -227,7 +227,7 @@ router.post('/', async (req, res) => {
       })
     } else {
       user.loginCount = body.user.loginCount
-      user.save()
+    await user.save()
     }
     await applyModifications(body.modifications, user)
     const favorites = await Favorite.find({ creator: user })
