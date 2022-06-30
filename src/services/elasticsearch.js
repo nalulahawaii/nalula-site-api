@@ -1,7 +1,10 @@
 import { Client } from '@elastic/elasticsearch'
+import { newLogger } from 'src/services/logging'
+
+const log = newLogger('ElasticSearch Client')
 
 export const esClient = new Client({
-  node: process.env.ELASTIC_SEARCH_URL,
+  node: process.env.ELASTIC_SEARCH_URI,
 })
 
 export const esBulk = async (str) => {
@@ -9,11 +12,11 @@ export const esBulk = async (str) => {
   try {
     json = JSON.parse(str)
   } catch (e) {
-    console.error(e, str)
+    log.error(`Error parsing JSON for esBulk: "${str}"`, e)
     return false
   }
   if(!esClient) {
-    console.error('no client provided!')
+    log.error('no client provided!')
     return false
   }
   const res = await esClient.bulk({
@@ -21,7 +24,7 @@ export const esBulk = async (str) => {
     refresh: 'wait_for',
   })
   if(res.statusCode !== 200) {
-    console.error('bulk api error', res)
+    log.error('bulk api error', res)
     return false
   }
   return true
