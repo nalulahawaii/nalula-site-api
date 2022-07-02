@@ -50,171 +50,163 @@ const deleteSearchES = (userId) => {
 
 const applyModifications = async (modifications, user) => {
   if(!modifications) return
-  const favGroupMods = _.filter(modifications, { type: 'favoriteGroup' })
+  let promises
+  const modsByType = _.groupBy(modifications, 'type')
   let lastGroupUpdated
-  let promises = favGroupMods.map(async (mod) => {
-    const { action, data } = mod
-    if(action === 'insert') {
-      lastGroupUpdated = await FavoriteGroup.create({
-        creator: user,
-        ...data,
-      })
-    } else if(action === 'update') {
-      lastGroupUpdated = await FavoriteGroup.findByIdAndUpdate(
-        data._id,
-        {
-          ...data,
-          creator: user,
-        },
-        {
-          new: true,
-          upsert: true,
-          useFindAndModify: false,
-          omitUndefined: true,
-          lean: true,
-        },
-      )
-    } else if(action === 'delete') {
-      const group = await FavoriteGroup.findByIdAndDelete(data._id, {
-        useFindAndModify: false,
-      })
-      await Favorite.deleteMany({ group })
-    }
-  })
-  if(promises.length) {
-    await Promise.all(promises)
-  }
 
-  const favMods = modifications.filter((mod) => mod.type === 'favorite')
-  promises = favMods.map(async (mod) => {
-    const { action, data } = mod
-
-    if(action === 'insert') {
-      await Favorite.findOneAndUpdate(
-        {
-          listingId: data.listingId,
-          group: data.group,
-        },
-        {
-          ...data,
-          creator: user,
-          group: data.group || lastGroupUpdated?._id,
-        },
-        {
-          new: true,
-          upsert: true,
-          useFindAndModify: false,
-          omitUndefined: true,
-          lean: true,
-        },
-      )
-    } else if(action === 'update') {
-      await Favorite.findOneAndUpdate(
-        {
-          _id: data._id,
-        },
-        {
-          ...data,
-          creator: user,
-          group: data.group || lastGroupUpdated?._id,
-        },
-        {
-          new: true,
-          upsert: true,
-          useFindAndModify: false,
-          omitUndefined: true,
-          lean: true,
-        },
-      )
-    } else if(action === 'delete') {
-      await Favorite.findByIdAndDelete(data._id, {
-        useFindAndModify: false,
-      })
-    }
-  })
-  if(promises.length) {
-    await Promise.all(promises)
-  }
-
-  const messageMods = modifications.filter((mod) => mod.type === 'message')
-  promises = messageMods.map(async (mod) => {
-    const { action, data } = mod
-
-    if(action === 'insert') {
-      await Message.findByIdAndUpdate(
-        data._id,
-        {
-          ...data,
-          sender: user._id,
-        },
-        {
-          new: true,
-          upsert: true,
-          useFindAndModify: false,
-          omitUndefined: true,
-          lean: true,
-        },
-      )
-    } else if(action === 'update') {
-      await Message.findByIdAndUpdate(
-        data._id,
-        {
-          ...data,
-          sender: user._id,
-        },
-        {
-          new: true,
-          upsert: true,
-          useFindAndModify: false,
-          omitUndefined: true,
-          lean: true,
-        },
-      )
-    } else if(action === 'delete') {
-      await Message.findByIdAndDelete(data._id, {
-        useFindAndModify: false,
-      })
-    }
-  })
-  if(promises.length) {
-    await Promise.all(promises)
-  }
-
-  const searchMods = modifications.filter((mod) => mod.type === 'search')
-  promises = searchMods.map(async (mod) => {
-    const { action, data } = mod
-
-    if(action === 'insert' || action === 'update') {
-      const { _id } = await Search.findOneAndUpdate(
-        {
-          clickUrl: data.clickUrl,
-        },
-        {
-          ...data,
-          creator: user,
-          notifyDate: moment().format('YYYY-MM-DD[T]HH:mm:ss'),
-        },
-        {
-          new: true,
-          upsert: true,
-          useFindAndModify: false,
-          omitUndefined: true,
-          lean: true,
-        },
-      )
+  if(modsByType.favoriteGroup) {
+    promises = modsByType.favoriteGroup.map(async ({ action, data }) => {
       if(action === 'insert') {
-        await insertSearchES(data.esQuery, user._id, _id)
-      } else {
-        await updateSearchES(data.esQuery, user._id, _id)
+        lastGroupUpdated = await FavoriteGroup.create({
+          creator: user,
+          ...data,
+        })
+      } else if(action === 'update') {
+        lastGroupUpdated = await FavoriteGroup.findByIdAndUpdate(
+          data._id,
+          {
+            ...data,
+            creator: user,
+          },
+          {
+            new: true,
+            upsert: true,
+            useFindAndModify: false,
+            omitUndefined: true,
+            lean: true,
+          },
+        )
+      } else if(action === 'delete') {
+        const group = await FavoriteGroup.findByIdAndDelete(data._id, {
+          useFindAndModify: false,
+        })
+        await Favorite.deleteMany({ group })
       }
-    } else if(action === 'delete') {
-      await deleteSearchES(data._id)
-      await Search.findByIdAndDelete(data._id, {
-        useFindAndModify: false,
-      })
-    }
-  })
-  if(promises.length) {
+    })
+    await Promise.all(promises)
+  }
+
+  if(modsByType.favorite) {
+    promises = modsByType.favorite.map(async ({ action, data }) => {
+      if(action === 'insert') {
+        await Favorite.findOneAndUpdate(
+          {
+            listingId: data.listingId,
+            group: data.group,
+          },
+          {
+            ...data,
+            creator: user,
+            group: data.group || lastGroupUpdated?._id,
+          },
+          {
+            new: true,
+            upsert: true,
+            useFindAndModify: false,
+            omitUndefined: true,
+            lean: true,
+          },
+        )
+      } else if(action === 'update') {
+        await Favorite.findOneAndUpdate(
+          {
+            _id: data._id,
+          },
+          {
+            ...data,
+            creator: user,
+            group: data.group || lastGroupUpdated?._id,
+          },
+          {
+            new: true,
+            upsert: true,
+            useFindAndModify: false,
+            omitUndefined: true,
+            lean: true,
+          },
+        )
+      } else if(action === 'delete') {
+        await Favorite.findByIdAndDelete(data._id, {
+          useFindAndModify: false,
+        })
+      }
+    })
+    await Promise.all(promises)
+  }
+
+  if(modsByType.message) {
+    promises = modsByType.message.map(async ({ action, data }) => {
+      if(action === 'insert') {
+        await Message.findByIdAndUpdate(
+          data._id,
+          {
+            ...data,
+            sender: user._id,
+          },
+          {
+            new: true,
+            upsert: true,
+            useFindAndModify: false,
+            omitUndefined: true,
+            lean: true,
+          },
+        )
+      } else if(action === 'update') {
+        await Message.findByIdAndUpdate(
+          data._id,
+          {
+            ...data,
+            sender: user._id,
+          },
+          {
+            new: true,
+            upsert: true,
+            useFindAndModify: false,
+            omitUndefined: true,
+            lean: true,
+          },
+        )
+      } else if(action === 'delete') {
+        await Message.findByIdAndDelete(data._id, {
+          useFindAndModify: false,
+        })
+      }
+    })
+    await Promise.all(promises)
+  }
+
+  if(modsByType.search) {
+    promises = modsByType.search.map(async ({ action, data }) => {
+      if(action === 'insert' || action === 'update') {
+        const { _id } = await Search.findOneAndUpdate(
+          {
+            clickUrl: data.clickUrl,
+          },
+          {
+            ...data,
+            creator: user,
+            notifyDate: moment().format('YYYY-MM-DD[T]HH:mm:ss'),
+          },
+          {
+            new: true,
+            upsert: true,
+            useFindAndModify: false,
+            omitUndefined: true,
+            lean: true,
+          },
+        )
+        if(action === 'insert') {
+          await insertSearchES(data.esQuery, user._id, _id)
+        } else {
+          await updateSearchES(data.esQuery, user._id, _id)
+        }
+      } else if(action === 'delete') {
+        await deleteSearchES(data._id)
+        await Search.findByIdAndDelete(data._id, {
+          useFindAndModify: false,
+        })
+      }
+    })
     await Promise.all(promises)
   }
 }
