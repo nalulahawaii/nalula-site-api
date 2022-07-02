@@ -247,7 +247,7 @@ router.post('/', async (req, res) => {
   const favoriteGroups = favGroups.map((favGroup) => ({
     ...favGroup._doc,
     favoriteIndices: favorites
-      .map((fav, i) => fav.group && fav.group.toString() === favGroup._id.toString()
+      .map((fav, i) => fav.group && fav.group === favGroup
         ? i
         : null)
       .filter((idx) => idx !== null),

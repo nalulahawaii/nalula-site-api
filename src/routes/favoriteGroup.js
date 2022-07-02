@@ -10,14 +10,14 @@ const router = require('express').Router()
 router.get('/:id', async (req, res) => {
   const favoriteGroup = await FavoriteGroup.findById(req.params.id)
   const favorites = favoriteGroup
-    ? await Favorite.find({ group: favoriteGroup._id })
+    ? await Favorite.find({ group: favoriteGroup })
     : null
 
   sendJson(res, {
     favoriteGroup: {
       ...favoriteGroup._doc,
       favoriteIndices: favorites
-        .map((fav, i) => fav.group.toString() === favoriteGroup._id.toString()
+        .map((fav, i) => fav.group === favoriteGroup
           ? i
           : null)
         .filter((idx) => idx !== null),
