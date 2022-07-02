@@ -1,6 +1,9 @@
 import { sendJson } from 'src/util'
 import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
+import { newLogger } from 'src/services/logging'
+
+const log = newLogger('Favorite Group routes')
 
 const router = require('express').Router()
 
