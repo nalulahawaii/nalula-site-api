@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { esBulk } from 'src/services/elasticsearch'
 
 import express from 'express'
@@ -13,6 +12,7 @@ import Message from 'src/db/mongo/models/message.mongo'
 import Search from 'src/db/mongo/models/search.mongo'
 import _ from 'lodash'
 import { newLogger } from 'src/services/logging'
+import { getNowISO } from 'src/util/date'
 
 const log = newLogger('User Routes')
 
@@ -185,7 +185,7 @@ const applyModifications = async (modifications, user) => {
           {
             ...data,
             creator: user,
-            notifyDate: moment().format('YYYY-MM-DD[T]HH:mm:ss'),
+            notifyDate: getNowISO(),
           },
           {
             new: true,

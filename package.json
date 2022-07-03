@@ -28,7 +28,6 @@
     "lodash": "^4.17.21",
     "log4js": "^6.5.2",
     "luxon": "^2.4.0",
-    "moment": "^2.29.1",
     "mongoose": "^5.9.25",
     "node-cron": "^3.0.1",
     "nodemailer": "^6.4.11",

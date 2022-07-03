@@ -5,7 +5,7 @@ import {
 
 import nodemailer from 'nodemailer'
 import esb from 'elastic-builder'
-import moment from 'moment'
+import { DateTime } from 'luxon'
 import User from 'src/db/mongo/models/user.mongo'
 import Search from 'src/db/mongo/models/search.mongo'
 import Message from 'src/db/mongo/models/message.mongo'
@@ -13,6 +13,10 @@ import { reportError } from 'src/util/error-handling'
 import { newLogger } from 'src/services/logging'
 
 import _ from 'lodash'
+import {
+  getNowISO,
+  luxonDateTimeToISO,
+} from 'src/util/date'
 
 const log = newLogger('Searches Worker')
 
@@ -79,13 +83,14 @@ const worker = async () => {
         ? { minutes: 15 }
         : { hours: 12 }
       const time = moment().subtract(frequency)
+  const timeStamp = luxonDateTimeToISO(DateTime.now().minus(notificationFrequency))
       const searches = await Search.find({
         $and: [
           { _id: searchIds },
           {
             $or: [
               {
-                notifyDate: { $lte: time.toDate() },
+            notifyDate: { $lte: timeStamp },
               },
               { notifyDate: null },
             ],
@@ -96,6 +101,7 @@ const worker = async () => {
         search.notifyDate = moment().format('YYYY-MM-DD[T]HH:mm:ss')
         log.debug('search.notifyDate', search.notifyDate)
         esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "listing-query-000001"} },{ "doc" : {"changed" : "false"} },`
+    search.notifyDate = getNowISO()
         search.save()
       })
       log.debug('searches length', searches.length)
