@@ -10,14 +10,11 @@ const addCorsHeaders = (res) => {
     'GET, PUT, POST, DELETE, HEAD, OPTIONS',
   )
 }
-
 export const sendJson = (res, results) => {
   addCorsHeaders(res)
   res.status(200).json(results)
 }
-
 export const sendError = (res, results) => {
   addCorsHeaders(res)
   res.status(400).error(results)
 }
-

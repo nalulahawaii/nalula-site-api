@@ -1,6 +1,6 @@
 const crypto = require('crypto')
+import { sendJson } from 'src/util/http'
 const router = require('express').Router()
-const { sendJson } = require('src/util')
 
 router.post('/', async (req, res) => {
   const {

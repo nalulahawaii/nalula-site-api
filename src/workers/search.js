@@ -17,6 +17,7 @@ import {
   getNowISO,
   luxonDateTimeToISO,
 } from 'src/util/date'
+import { logValDetailed } from 'src/util/debug'
 
 const log = newLogger('Searches Worker')
 
@@ -28,6 +29,7 @@ const queryAsJSON = esb
 
 const getChangesHits = async () => {
   try {
+    log.info('queryAsJSON', logValDetailed(queryAsJSON))
     const results = await esClient.search({
       index: 'listing-query-000001',
       body: queryAsJSON,

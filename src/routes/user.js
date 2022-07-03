@@ -1,10 +1,6 @@
 import { esBulk } from 'src/services/elasticsearch'
 
 import express from 'express'
-import {
-  sendError,
-  sendJson,
-} from 'src/util'
 import User from 'src/db/mongo/models/user.mongo'
 import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
@@ -13,6 +9,10 @@ import Search from 'src/db/mongo/models/search.mongo'
 import _ from 'lodash'
 import { newLogger } from 'src/services/logging'
 import { getNowISO } from 'src/util/date'
+import {
+  sendError,
+  sendJson,
+} from 'src/util/http'
 
 const log = newLogger('User Routes')
 

@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node'
-import util from 'util'
 import { newLogger } from 'src/services/logging'
+import { logValDetailed } from 'src/util/debug'
 
 const log = newLogger('dev reportError')
 
@@ -17,6 +17,6 @@ export const reportError = ({ e, ...context }) => {
   if(process.env.NODE_ENV === 'production') {
     Sentry.captureException(err, context)
   } else {
-    log.error(e, util.inspect(context, { depth: 10, colors: true }))
+    log.error(e, logValDetailed(context))
   }
 }

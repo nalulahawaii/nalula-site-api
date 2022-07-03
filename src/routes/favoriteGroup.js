@@ -1,7 +1,7 @@
-import { sendJson } from 'src/util'
 import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
 import { newLogger } from 'src/services/logging'
+import { sendJson } from 'src/util/http'
 
 const log = newLogger('Favorite Group routes')
 
