@@ -2,9 +2,8 @@ import {
   esBulk,
   esClient,
 } from 'src/services/elasticsearch'
-
-import nodemailer from 'nodemailer'
 import esb from 'elastic-builder'
+import nodemailer from 'nodemailer'
 import { DateTime } from 'luxon'
 import User from 'src/db/mongo/models/user.mongo'
 import Search from 'src/db/mongo/models/search.mongo'
@@ -24,18 +23,22 @@ const log = newLogger('Searches Worker')
 const queryAsJSON = esb
   .requestBodySearch()
   .size(1000)
-  .query(esb.matchQuery('changed', true))
+  .query(esb.termQuery('changed', true))
   .toJSON()
+
+const notificationFrequency = process.env.SAVED_SEARCH_TEST_MODE
+  ? { minutes: 15 }
+  : { hours: 12 }
 
 const getChangesHits = async () => {
   try {
     log.info('queryAsJSON', logValDetailed(queryAsJSON))
     const results = await esClient.search({
-      index: 'listing-query-000001',
+      index: 'listing-000002',
       body: queryAsJSON,
     })
     const hits = results?.body?.hits?.hits || []
-    log.debug('hit count', hits.length)
+    log.debug(`${hits.length} hits`)
     return hits
   } catch (e) {
     return repErr({
@@ -48,135 +51,103 @@ const getChangesHits = async () => {
 const worker = async () => {
   const hits = await getChangesHits()
   if(_.isEmpty(hits)) return
-  log.debug('first hit', hits[0])
-  let userIds = new Set()
-  let esBulkStr = ''
-  const searchIds = hits.map((hit) => {
-    const {
-      _id,
-      _source: { user_id },
-    } = hit
+  const userIds = new Set()
+  const searchIds = hits.map(({
+    _id,
+    _source: { user_id },
+  }) => {
     userIds.add(user_id)
     return _id
   })
-  log.debug('searchIds', searchIds)
-  log.debug('userIds', userIds)
-  if(searchIds.length) {
-    if(process.env.SAVED_SEARCH_TEST_MODE) {
-      const includeCreators = [
-        '5f3604378f6eac13f35708a9',
-        '5f3719179ca137184aae391d',
-        '5f3720ce9ca137184aae391f',
-        '5f3c5ffd604412506a549391',
-        '5fda4b01968dd12d89a54dfc',
-      ]
-      userIds = [...userIds].filter((id) => includeCreators.includes(id))
-    } else {
-      userIds = [...userIds]
-    }
+  if(_.isEmpty(searchIds)) return
 
-    log.debug('filtered user ids', userIds)
+  log.debug('Changed Property Ids', searchIds)
+  log.debug('userIds of changed properties', userIds)
 
-    if(userIds.length) {
-      const users = await User.find({ _id: [...userIds] })
-      log.debug('users length', users.length)
+  if(_.isEmpty(userIds)) return
 
-      const frequency = process.env.SAVED_SEARCH_TEST_MODE
-        ? { minutes: 15 }
-        : { hours: 12 }
-      const time = moment().subtract(frequency)
+  const users = await User.findById(userIds)
+  if(_.isEmpty(users)) {
+    log.debug('no current users')
+    return
+  }
+
+  log.debug(`Changes found for ${_.size(users)} current users' saved searches`)
+
+  // Find saved searches that are due for notifications:
   const timeStamp = luxonDateTimeToISO(DateTime.now().minus(notificationFrequency))
-      const searches = await Search.find({
-        $and: [
-          { _id: searchIds },
+  const searches = await Search.find({
+    $and: [
+      { _id: searchIds },
+      {
+        $or: [
           {
-            $or: [
-              {
             notifyDate: { $lte: timeStamp },
-              },
-              { notifyDate: null },
-            ],
           },
+          { notifyDate: null },
         ],
-      })
-      searches.forEach(search => {
-        search.notifyDate = moment().format('YYYY-MM-DD[T]HH:mm:ss')
-        log.debug('search.notifyDate', search.notifyDate)
-        esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "listing-query-000001"} },{ "doc" : {"changed" : "false"} },`
-    search.notifyDate = getNowISO()
-        search.save()
-      })
-      log.debug('searches length', searches.length)
-      const userSearches = {}
-      let id
-      searches.forEach((search) => {
-        id = search.creator._id
-        if(!userSearches[id]) userSearches[id] = []
-        userSearches[id].push(search)
-      })
-      log.debug('userSearches', userSearches)
-      if(Object.keys(userSearches).length) {
-        const promises = users.map(async (user) => {
-          const searches = userSearches[user._id]
-          if(searches) {
-            const emailClickUrls = []
-            const messageClickUrls = []
-            searches.forEach((search) => {
-              const { isInternalNotify, isEmailNotify, clickUrl } = search
-              if(isEmailNotify) {
-                emailClickUrls.push(clickUrl)
-              }
-              if(isInternalNotify) {
-                messageClickUrls.push(clickUrl)
-              }
-              // search.notifyDate = moment().format("YYYY-MM-DD[T]HH:mm:ss");
-              // log.debug("search.notifyDate", search.notifyDate);
-              // esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "listing-query-000001"} },{ "doc" : {"changed" : "false"} },`;
-              // search.save();
-            })
-            log.debug('emailClickUrls', emailClickUrls)
-            if(emailClickUrls.length) {
-              await sendEmail(user, emailClickUrls)
-            }
-            // log.debug("messageClickUrls", messageClickUrls);
-            if(messageClickUrls.length) {
-              const text = `Some of your saved searches have new properties!`
-              await Message.findOneAndUpdate(
-                { receiverId: user._id, text },
-                {
-                  receiverId: user._id,
-                  text,
-                  data: JSON.stringify(messageClickUrls),
-                },
-                {
-                  new: true,
-                  upsert: true,
-                  useFindAndModify: false,
-                  omitUndefined: true,
-                  lean: true,
-                },
-              )
-            }
-          }
-        })
-        await Promise.all(promises)
-      }
-    }
+      },
+    ],
+  })
+  if(!_.isEmpty(searches)) {
+    log.debug('No notifications are due for the saved searches')
+    return
   }
 
-  if(esBulkStr.length) {
-    esBulkStr = esBulkStr.slice(0, -1)
-    log.debug('esBulkStr', esBulkStr)
-    const res = await esBulk(`[${esBulkStr}]`)
-    if(!res) {
-      console.error('bulk api failure! terminate', res)
-    } else {
-      // log.debug(res);
+  log.debug(`${_.size(searches)} saved searches are due for notifications`)
+
+  // Update saved search notification dates and mark as unchanged:
+  let esBulkStr = ''
+  _.forEach(searches, search => {
+    // eslint-disable-next-line no-param-reassign
+    search.notifyDate = getNowISO()
+    esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "listing-000002"} },{ "doc" : {"changed" : "false"} },`
+    search.save()
+  })
+
+  const userSearches = _.groupBy(searches, 'creator._id')
+  log.debug('saved searches grouped by user', userSearches)
+  const promises = users.map(async (user) => {
+    const mySearches = userSearches[user._id]
+    if(!mySearches) return
+    const emailClickUrls = []
+    const messageClickUrls = []
+    mySearches.forEach(({ isInternalNotify, isEmailNotify, clickUrl }) => {
+      if(isEmailNotify) emailClickUrls.push(clickUrl)
+      if(isInternalNotify) messageClickUrls.push(clickUrl)
+    })
+    log.debug('emailClickUrls', emailClickUrls)
+    if(emailClickUrls.length) await sendEmail(user, emailClickUrls)
+    // log.debug("messageClickUrls", messageClickUrls);
+    if(messageClickUrls.length) {
+      const text = `Some of your saved searches have new properties!`
+      await Message.findOneAndUpdate(
+        { receiverId: user._id, text },
+        {
+          receiverId: user._id,
+          text,
+          data: JSON.stringify(messageClickUrls),
+        },
+        {
+          new: true,
+          upsert: true,
+          useFindAndModify: false,
+          omitUndefined: true,
+          lean: true,
+        },
+      )
     }
-  }
+  })
+  await Promise.all(promises)
+
+  if(_.isEmpty(esBulkStr)) return
+  esBulkStr = esBulkStr.slice(0, -1)
+  log.debug('esBulkStr', esBulkStr)
+  const res = await esBulk(`[${esBulkStr}]`)
+  if(!res) log.error('bulk api failure! terminate', res)
 }
 
-const sendEmail = async ({ name, email }, clickUrls) => {
+const sendEmail = ({ name, email }, clickUrls) => {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
@@ -201,8 +172,7 @@ const sendEmail = async ({ name, email }, clickUrls) => {
     text: textBody,
     html: htmlBody,
   }
-  const res = await transporter.sendMail(mail)
-  return res
+  return transporter.sendMail(mail)
 }
 
 const repErr = ({ e, operation, extra }) => {
@@ -217,8 +187,8 @@ const repErr = ({ e, operation, extra }) => {
 }
 
 export default {
-  name: 'Search Updates',
-  message: 'Sending Notification of Changes to Saved Searches.',
+  name: 'Search Change Notifications',
+  message: 'Notifying Users of Changes to Saved Searches.',
   schedule: '1 8,20 * * *', // 8:01 am, 8:01pm
   worker,
   immediate: true,
