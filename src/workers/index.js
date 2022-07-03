@@ -31,7 +31,6 @@ export const createWorker = ({
   enabled = false,
 }) => {
   if(!enabled) return
-  log.info(`Creating worker "${name}"`)
   const func = () => {
     if(message) log.info(message)
     worker()
@@ -40,6 +39,7 @@ export const createWorker = ({
     scheduled: true,
     timezone,
   }))
+  log.info(`Created worker "${name}"`)
   if(immediate) func()
 }
 
