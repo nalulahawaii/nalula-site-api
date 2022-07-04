@@ -31,20 +31,20 @@ const modifySearchES = async str => {
 }
 
 const insertSearchES = (esQuery, userId, _id) => {
-  const str = `[{"index": {"_index": "listing-000002","_type": "_doc", "_id": "${_id}"}},
+  const str = `[{"index": {"_index": "listing-query-000001","_type": "_doc", "_id": "${_id}"}},
   { "user_id": "${userId}", "enabled": "true", "changed": "false", ${extractQuery(esQuery)}}]`
   return modifySearchES(str)
 }
 
 const updateSearchES = (esQuery, userId, _id) => {
-  const str = `[{"update": {"_index": "listing-000002","_type": "_doc", "_id": "${_id}"}},
+  const str = `[{"update": {"_index": "listing-query-000001","_type": "_doc", "_id": "${_id}"}},
   {"doc": { "user_id": "${userId}", "enabled": "true", "changed": "false", "change_time": ""
   )}", ${extractQuery(esQuery)}}, "doc_as_upsert": "true"}]`
   return modifySearchES(str)
 }
 
-const deleteSearchES = (userId) => {
-  const str = `[{"delete": {"_index": "listing-000002","_type": "_doc", "_id": "${userId}"}}]`
+export const deleteSearchES = (_id) => {
+  const str = `[{"delete": {"_index": "listing-query-000001","_type": "_doc", "_id": "${_id}"}}]`
   return modifySearchES(str)
 }
 

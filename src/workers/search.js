@@ -33,7 +33,7 @@ const getChangesHits = async () => {
   try {
     log.info('queryAsJSON', logValDetailed(queryAsJSON))
     const results = await esClient.search({
-      index: 'listing-000002',
+      index: 'listing-query-000001',
       body: queryAsJSON,
     })
     const hits = results?.body?.hits?.hits || []
