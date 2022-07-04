@@ -25,7 +25,7 @@ const queryAsJSON = esb
   .query(esb.termQuery('changed', true))
   .toJSON()
 
-const notificationFrequency = process.env.SAVED_SEARCH_TEST_MODE
+const notificationFrequency = process.env.SAVED_SEARCH_TEST_MODE === 'true'
   ? { minutes: 15 }
   : { hours: 12 }
 
@@ -50,6 +50,7 @@ const getChangesHits = async () => {
 const worker = async () => {
   const hits = await getChangesHits()
   if(_.isEmpty(hits)) return
+  log.debug('hits detail', logValDetailed(hits))
   const userIds = new Set()
   const searchIds = hits.map(({
     _id,
@@ -60,8 +61,8 @@ const worker = async () => {
   })
   if(_.isEmpty(searchIds)) return
 
-  log.debug('Changed Property Ids', searchIds)
-  log.debug('userIds of changed properties', userIds)
+  log.debug('IDs of changed searches:', searchIds)
+  log.debug('userIds of changed searches', userIds)
 
   if(_.isEmpty(userIds)) return
 
