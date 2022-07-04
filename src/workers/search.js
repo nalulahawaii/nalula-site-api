@@ -3,20 +3,19 @@ import {
   esClient,
 } from 'src/services/elasticsearch'
 import esb from 'elastic-builder'
-import nodemailer from 'nodemailer'
 import { DateTime } from 'luxon'
 import User from 'src/db/mongo/models/user.mongo'
 import Search from 'src/db/mongo/models/search.mongo'
 import Message from 'src/db/mongo/models/message.mongo'
 import { reportError } from 'src/util/error-handling'
 import { newLogger } from 'src/services/logging'
-
 import _ from 'lodash'
 import {
   getNowISO,
   luxonDateTimeToISO,
 } from 'src/util/date'
 import { logValDetailed } from 'src/util/debug'
+import { sendEmail } from 'src/services/email'
 
 const log = newLogger('Searches Worker')
 
@@ -117,8 +116,9 @@ const worker = async () => {
       if(isInternalNotify) messageClickUrls.push(clickUrl)
     })
     log.debug('emailClickUrls', emailClickUrls)
-    if(emailClickUrls.length) await sendEmail(user, emailClickUrls)
+    if(emailClickUrls.length) await sendNotifications(user, emailClickUrls)
     // log.debug("messageClickUrls", messageClickUrls);
+    
     if(messageClickUrls.length) {
       const text = `Some of your saved searches have new properties!`
       await Message.findOneAndUpdate(
@@ -147,16 +147,15 @@ const worker = async () => {
   if(!res) log.error('bulk api failure! terminate', res)
 }
 
-const sendEmail = ({ name, email }, clickUrls) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: true,
-    auth: {
-      user: process.env.SMTP_USERNAME,
-      pass: process.env.SMTP_PASSWORDs,
-    },
-  })
+/**
+ * Send email and/or SMS notifications of new properties in saved searches.
+ *
+ * @param {string} name
+ * @param {string} email
+ * @param {string[]} clickUrls
+ * @returns {Promise<[ClientResponse, {}]>}
+ */
+const sendNotifications = ({ name, email }, clickUrls) => {
   let htmlText = ''
   let text = ''
   clickUrls.forEach((url) => {
@@ -165,14 +164,7 @@ const sendEmail = ({ name, email }, clickUrls) => {
   })
   const textBody = `FROM: Nalula EMAIL: hello@nalula.com MESSAGE: Aloha ${name},\n\nSome of your saved searches have new properties! View the new listings at:\n\n${text}\n\nIf you have questions about the area or a specific property, please reach out to one of the agents that is an expert for your unique search as shown on our agent leaderboard.\n\nIf you would like to make an offer on a specific property, please consider using a Nalula Preferred agent to get a tremendous rebate. Details can be found on each property detail page.\n\nBest regards,\nThe Nalula Team\n\n\n\n\n\n251 Little Falls Drive Wilmington, DE 19808\nPrivacy Policy: https://nalula.com/privacy\nUnsubscribe: Please visit the link to view your saved property and unsave the search`
   const htmlBody = `<p>Aloha ${name},</p><p>Some of your saved searches have a new property! View the new listings at:</p>${htmlText}<p>If you have questions about the area or a specific property, please reach out to one of the agents that is an expert for your unique search as shown on our agent leaderboard.</p><p>If you would like to make an offer on a specific property, please consider using a Nalula Preferred agent to get a tremendous rebate. Details can be found on each property detail page.</p><p>Best regards,<br />The Nalula Team</p><p style='margin-top: 100px'><small>251 Little Falls Drive Wilmington, DE 19808<br /><a href='https://nalula.com/privacy'>Privacy Policy</a><br />Unsubscribe: Please visit the link to view your saved property and unsave the search</small></p>`
-  const mail = {
-    from: 'Nalula <hello@nalula.com>',
-    to: `${name} <${email}>`,
-    subject: 'A new property matches your saved search',
-    text: textBody,
-    html: htmlBody,
-  }
-  return transporter.sendMail(mail)
+  return sendEmail({ name, email, textBody, htmlBody })
 }
 
 const repErr = ({ e, operation, extra }) => {
