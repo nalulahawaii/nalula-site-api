@@ -101,7 +101,7 @@ const worker = async () => {
   _.forEach(searches, search => {
     // eslint-disable-next-line no-param-reassign
     search.notifyDate = getNowISO()
-    esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "listing-000002"} },{ "doc" : {"changed" : "false"} },`
+    esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "listing-query-000001"} },{ "doc" : {"changed" : "false"} },`
     search.save()
   })
 
@@ -119,7 +119,7 @@ const worker = async () => {
     log.debug('emailClickUrls', emailClickUrls)
     if(emailClickUrls.length) await sendNotifications(user, emailClickUrls)
     // log.debug("messageClickUrls", messageClickUrls);
-    
+
     if(messageClickUrls.length) {
       const text = `Some of your saved searches have new properties!`
       await Message.findOneAndUpdate(
