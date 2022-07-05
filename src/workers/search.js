@@ -31,7 +31,6 @@ const notificationFrequency = process.env.SAVED_SEARCH_TEST_MODE === 'true'
 
 const getChangesHits = async () => {
   try {
-    log.info('queryAsJSON', logValDetailed(queryAsJSON))
     const results = await esClient.search({
       index: 'listing-query-000001',
       body: queryAsJSON,
@@ -145,7 +144,10 @@ const worker = async () => {
   esBulkStr = esBulkStr.slice(0, -1)
   log.debug('esBulkStr', esBulkStr)
   const res = await esBulk(`[${esBulkStr}]`)
-  if(!res) log.error('bulk api failure! terminate', res)
+  if(!res) repErr({
+    e: 'no response from API',
+    operation: 'update saved searches index',
+  })
 }
 
 /**

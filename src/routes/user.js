@@ -7,45 +7,32 @@ import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
 import Message from 'src/db/mongo/models/message.mongo'
 import Search from 'src/db/mongo/models/search.mongo'
 import _ from 'lodash'
-import { newLogger } from 'src/services/logging'
 import { getNowISO } from 'src/util/date'
 import {
   sendError,
   sendJson,
 } from 'src/util/http'
 
-const log = newLogger('User Routes')
-
 const router = express.Router()
 
 const extractQuery = esQuery => esQuery.slice(1, esQuery.length - 1)
 
-const modifySearchES = async str => {
-  const res = await esBulk(str)
-  if(!res) {
-    log.error('bulk api failure! terminate', res)
-  } else {
-    log.debug(res)
-  }
-  return res
-}
-
 const insertSearchES = (esQuery, userId, _id) => {
-  const str = `[{"index": {"_index": "listing-query-000001","_type": "_doc", "_id": "${_id}"}},
+  const str = `[{"index": {"_index": "${process.env.ELASTIC_SEARCH_SAVED_SEARCH_INDEX}","_type": "_doc", "_id": "${_id}"}},
   { "user_id": "${userId}", "enabled": "true", "changed": "false", ${extractQuery(esQuery)}}]`
-  return modifySearchES(str)
+  return esBulk(str)
 }
 
 const updateSearchES = (esQuery, userId, _id) => {
-  const str = `[{"update": {"_index": "listing-query-000001","_type": "_doc", "_id": "${_id}"}},
+  const str = `[{"update": {"_index": "${process.env.ELASTIC_SEARCH_SAVED_SEARCH_INDEX}","_type": "_doc", "_id": "${_id}"}},
   {"doc": { "user_id": "${userId}", "enabled": "true", "changed": "false", "change_time": ""
   )}", ${extractQuery(esQuery)}}, "doc_as_upsert": "true"}]`
-  return modifySearchES(str)
+  return esBulk(str)
 }
 
 export const deleteSearchES = (_id) => {
-  const str = `[{"delete": {"_index": "listing-query-000001","_type": "_doc", "_id": "${_id}"}}]`
-  return modifySearchES(str)
+  const str = `[{"delete": {"_index": "${process.env.ELASTIC_SEARCH_SAVED_SEARCH_INDEX}","_type": "_doc", "_id": "${_id}"}}]`
+  return esBulk(str)
 }
 
 const applyModifications = async (modifications, user) => {

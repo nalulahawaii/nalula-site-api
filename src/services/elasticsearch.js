@@ -1,5 +1,7 @@
 import { Client } from '@elastic/elasticsearch'
 import { newLogger } from 'src/services/logging'
+import { reportError } from 'src/util/error-handling'
+import { logValDetailed } from 'src/util/debug'
 
 const log = newLogger('ElasticSearch Client')
 
@@ -16,17 +18,41 @@ export const esBulk = async (str) => {
     return false
   }
   try {
-    log.debug('running bulk api update with', json)
     const res = await esClient.bulk({
       body: json,
       refresh: 'wait_for',
     })
     if(res.statusCode !== 200) {
-      log.error('bulk api error', res)
+      repErr({
+        e: res.statusMessage,
+        operation: 'bulk',
+        extra: {
+          json,
+        },
+      })
       return false
     }
+    log.debug(logValDetailed(res))
+
   } catch (e) {
-    log.error('bulk api error, e')
+    repErr({
+      e,
+      operation: 'bulk',
+      extra: {
+        json,
+      },
+    })
   }
   return true
+}
+
+const repErr = ({ e, operation, extra }) => {
+  reportError({
+    e,
+    tags: {
+      service: 'ElasticSearch',
+      operation,
+    },
+    extra,
+  })
 }
