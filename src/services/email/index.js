@@ -1,7 +1,7 @@
 import sgMail from '@sendgrid/mail'
 import { newLogger } from 'src/services/logging'
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+if(process.env.SENDGRID_API_KEY) sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const log = newLogger('Email Client')
 
