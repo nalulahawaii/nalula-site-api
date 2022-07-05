@@ -1,7 +1,6 @@
 import { Client } from '@elastic/elasticsearch'
 import { newLogger } from 'src/services/logging'
 import { reportError } from 'src/util/error-handling'
-import { logValDetailed } from 'src/util/debug'
 
 const log = newLogger('ElasticSearch Client')
 
@@ -32,8 +31,6 @@ export const esBulk = async (str) => {
       })
       return false
     }
-    log.debug(logValDetailed(res))
-
   } catch (e) {
     repErr({
       e,

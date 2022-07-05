@@ -3,7 +3,6 @@ import {
   esClient,
 } from 'src/services/elasticsearch'
 import esb from 'elastic-builder'
-import { DateTime } from 'luxon'
 import User from 'src/db/mongo/models/user.mongo'
 import Search from 'src/db/mongo/models/search.mongo'
 import Message from 'src/db/mongo/models/message.mongo'
@@ -11,23 +10,25 @@ import { reportError } from 'src/util/error-handling'
 import { newLogger } from 'src/services/logging'
 import _ from 'lodash'
 import {
+  getNow,
   getNowISO,
   luxonDateTimeToISO,
 } from 'src/util/date'
 import { logValDetailed } from 'src/util/debug'
 import { sendEmail } from 'src/services/email'
+import mongoose from 'mongoose'
 
 const log = newLogger('Searches Worker')
 
 const queryAsJSON = esb
   .requestBodySearch()
   .size(1000)
-  .query(esb.termQuery('changed', true))
+  .query(esb.termQuery('changed', false))
   .toJSON()
 
-const notificationFrequency = process.env.SAVED_SEARCH_TEST_MODE === 'true'
-  ? { minutes: 15 }
-  : { hours: 12 }
+const notificationFrequency = process.env.NODE_ENV === 'production'
+  ? { hours: 12 }
+  : { minutes: 1 }
 
 const getChangesHits = async () => {
   try {
@@ -40,7 +41,7 @@ const getChangesHits = async () => {
     return hits
   } catch (e) {
     return repErr({
-      e: e.meta.body.error,
+      e,
       operation: 'Retrieve changes from ElasticSearch',
     })
   }
@@ -63,21 +64,21 @@ const worker = async () => {
   log.debug('IDs of changed searches:', searchIds)
   log.debug('userIds of changed searches', userIds)
 
-  if(_.isEmpty(userIds)) return
+  if(userIds.size === 0) return
 
-  const users = await User.findById(userIds)
-  if(_.isEmpty(users)) {
-    log.debug('no current users')
+  const activeUsers = await User.find({ _id: [...userIds] })
+  if(_.isEmpty(activeUsers)) {
+    log.debug('no active users')
     return
   }
 
-  log.debug(`Changes found for ${_.size(users)} current users' saved searches`)
+  log.debug(`Changes found for ${_.size(activeUsers)} current users' saved searches`)
 
   // Find saved searches that are due for notifications:
-  const timeStamp = luxonDateTimeToISO(DateTime.now().minus(notificationFrequency))
-  const searches = await Search.find({
+  const timeStamp = luxonDateTimeToISO(getNow().minus(notificationFrequency))
+  const searchesFilter = {
     $and: [
-      { _id: searchIds },
+      { _id: { $in: searchIds.map(mongoose.Types.ObjectId) } },
       {
         $or: [
           {
@@ -87,8 +88,9 @@ const worker = async () => {
         ],
       },
     ],
-  })
-  if(!_.isEmpty(searches)) {
+  }
+  const searches = await Search.find(searchesFilter)
+  if(_.isEmpty(searches)) {
     log.debug('No notifications are due for the saved searches')
     return
   }
@@ -106,7 +108,7 @@ const worker = async () => {
 
   const userSearches = _.groupBy(searches, 'creator._id')
   log.debug('saved searches grouped by user', userSearches)
-  const promises = users.map(async (user) => {
+  const promises = activeUsers.map(async (user) => {
     const mySearches = userSearches[user._id]
     if(!mySearches) return
     const emailClickUrls = []
