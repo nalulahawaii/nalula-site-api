@@ -124,9 +124,9 @@ const worker = async () => {
     if(messageClickUrls.length) {
       const text = `Some of your saved searches have new properties!`
       await Message.findOneAndUpdate(
-        { receiverId: user._id, text },
+        { receiver: user, text },
         {
-          receiverId: user._id,
+          receiverId: user,
           text,
           data: JSON.stringify(messageClickUrls),
         },
