@@ -32,7 +32,7 @@ const notificationFrequency = process.env.SAVED_SEARCH_TEST_MODE === 'true'
 const getChangesHits = async () => {
   try {
     const results = await esClient.search({
-      index: 'listing-query-000001',
+      index: process.env.ELASTIC_SEARCH_SAVED_SEARCH_INDEX,
       body: queryAsJSON,
     })
     const hits = results?.body?.hits?.hits || []
@@ -100,7 +100,7 @@ const worker = async () => {
   _.forEach(searches, search => {
     // eslint-disable-next-line no-param-reassign
     search.notifyDate = getNowISO()
-    esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "listing-query-000001"} },{ "doc" : {"changed" : "false"} },`
+    esBulkStr += `{ "update" : {"_id" : "${search._id}", "_index" : "${process.env.ELASTIC_SEARCH_SAVED_SEARCH_INDEX}"} },{ "doc" : {"changed" : "false"} },`
     search.save()
   })
 
