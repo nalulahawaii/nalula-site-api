@@ -23,7 +23,7 @@ const log = newLogger('Searches Worker')
 const queryAsJSON = esb
   .requestBodySearch()
   .size(1000)
-  .query(esb.termQuery('changed', false))
+  .query(esb.termQuery('changed', true))
   .toJSON()
 
 const notificationFrequency = process.env.NODE_ENV === 'production'
