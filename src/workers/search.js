@@ -28,7 +28,7 @@ const queryAsJSON = esb
 
 const notificationFrequency = process.env.NODE_ENV === 'production'
   ? { hours: 12 }
-  : { minutes: 1 }
+  : { minutes: 5 }
 
 const getChangesHits = async () => {
   try {
