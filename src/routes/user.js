@@ -218,6 +218,7 @@ router.post('/', async (req, res) => {
     })
   } else {
     user.loginCount = body.user.loginCount
+    user.email_verified = body.user.email_verified || 'false'
     await user.save()
   }
   await applyModifications(body.modifications, user)
