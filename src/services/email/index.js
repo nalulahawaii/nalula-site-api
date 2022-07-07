@@ -5,11 +5,11 @@ if(process.env.SENDGRID_API_KEY) sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const log = newLogger('Email Client')
 
-export const sendEmail = ({ name, email, textBody, htmlBody }) => {
+export const sendEmail = ({ name, email, subject, textBody, htmlBody }) => {
   const msg = {
     from: 'Nalula <hello@nalula.com>',
     to: `${name} <${email}>`,
-    subject: 'A new property matches your saved search',
+    subject,
     text: textBody,
     html: htmlBody,
   }

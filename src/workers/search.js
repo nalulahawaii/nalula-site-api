@@ -169,7 +169,13 @@ const sendNotifications = ({ name, email }, clickUrls) => {
   })
   const textBody = `FROM: Nalula EMAIL: hello@nalula.com MESSAGE: Aloha ${name},\n\nSome of your saved searches have new properties! View the new listings at:\n\n${text}\n\nIf you have questions about the area or a specific property, please reach out to one of the agents that is an expert for your unique search as shown on our agent leaderboard.\n\nIf you would like to make an offer on a specific property, please consider using a Nalula Preferred agent to get a tremendous rebate. Details can be found on each property detail page.\n\nBest regards,\nThe Nalula Team\n\n\n\n\n\n251 Little Falls Drive Wilmington, DE 19808\nPrivacy Policy: https://nalula.com/privacy\nUnsubscribe: Please visit the link to view your saved property and unsave the search`
   const htmlBody = `<p>Aloha ${name},</p><p>Some of your saved searches have a new property! View the new listings at:</p>${htmlText}<p>If you have questions about the area or a specific property, please reach out to one of the agents that is an expert for your unique search as shown on our agent leaderboard.</p><p>If you would like to make an offer on a specific property, please consider using a Nalula Preferred agent to get a tremendous rebate. Details can be found on each property detail page.</p><p>Best regards,<br />The Nalula Team</p><p style='margin-top: 100px'><small>251 Little Falls Drive Wilmington, DE 19808<br /><a href='https://nalula.com/privacy'>Privacy Policy</a><br />Unsubscribe: Please visit the link to view your saved property and unsave the search</small></p>`
-  return sendEmail({ name, email, textBody, htmlBody })
+  return sendEmail({
+    name,
+    email,
+    subject: 'A new property matches your saved search',
+    textBody,
+    htmlBody,
+  })
 }
 
 const repErr = ({ e, operation, extra }) => {
