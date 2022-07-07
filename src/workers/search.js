@@ -68,7 +68,7 @@ const worker = async () => {
 
   const activeUsers = await User.find({ _id: [...userIds] })
   if(_.isEmpty(activeUsers)) {
-    log.debug('no active users')
+    log.debug('none of the userIds are active users')
     return
   }
 
