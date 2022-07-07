@@ -12,6 +12,10 @@ import {
   sendError,
   sendJson,
 } from 'src/util/http'
+import { newLogger } from 'src/services/logging'
+import { logValDetailed } from 'src/util/debug'
+
+const log = newLogger('User routes')
 
 const router = express.Router()
 
@@ -37,6 +41,7 @@ export const deleteSearchES = (_id) => {
 
 const applyModifications = async (modifications, user) => {
   if(!modifications) return
+  log.debug('applyModifications', logValDetailed(modifications))
   let promises
   const modsByType = _.groupBy(modifications, 'type')
   let lastGroupUpdated
