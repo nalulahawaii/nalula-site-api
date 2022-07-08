@@ -22,5 +22,3 @@ export const sendEmail = ({ name, email, subject, textBody, htmlBody }) => {
     }
   }
 }
-
-
