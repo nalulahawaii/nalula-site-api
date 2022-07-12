@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "watch": "BABEL_WATCH_NODE_OPTIONS=\"--require dotenv/config --trace-deprecation\" babel-watch ./src/server.js",
+    "dev": "NODE_ENV=development yarn watch",
+    "start": "NODE_ENV=production yarn watch",
+    "watch": "BABEL_WATCH_NODE_OPTIONS=\"--require dotenv/config\" babel-watch ./src/server.js",
     "lint": "eslint ./src",
     "test": "jest",
     "test:ci": "yarn lint && yarn test",
