@@ -2,7 +2,7 @@ import { Client } from '@elastic/elasticsearch'
 import { newLogger } from 'src/services/logging'
 import { reportError } from 'src/util/error-handling'
 
-const log = newLogger('ElasticSearch Client')
+const log = newLogger('ElasticSearch Client', 'debug', 'debug')
 
 export const esClient = new Client({
   node: process.env.ELASTIC_SEARCH_URI,

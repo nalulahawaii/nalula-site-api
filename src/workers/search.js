@@ -18,7 +18,7 @@ import { logValDetailed } from 'src/util/debug'
 import { sendEmail } from 'src/services/email'
 import mongoose from 'mongoose'
 
-const log = newLogger('Searches Worker')
+const log = newLogger('Searches Worker', 'debug', 'debug')
 
 const queryAsJSON = esb
   .requestBodySearch()
@@ -149,6 +149,9 @@ const worker = async () => {
   if(!res) repErr({
     e: 'no response from API',
     operation: 'update saved searches index',
+    extra: {
+      esBulkStr,
+    },
   })
 }
 

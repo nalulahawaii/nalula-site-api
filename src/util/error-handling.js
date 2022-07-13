@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node'
 import { newLogger } from 'src/services/logging'
 import { logValDetailed } from 'src/util/debug'
 
-const log = newLogger('Development Error Logging')
+const log = newLogger('Development Error Logging', 'debug', 'debug')
 
 if(process.env.NODE_ENV === 'development') log.info('Sentry.io-bound errors will be logged here in development environment')
 
