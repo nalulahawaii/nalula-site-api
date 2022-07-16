@@ -1,13 +1,9 @@
-import {
-  model,
-  Schema,
-} from 'mongoose'
+import { model, Schema } from 'mongoose'
 import { getMongooseRef } from 'src/util/mongoose'
 
 const schema = new Schema(
   {
     creator: getMongooseRef('User', true),
-    group: getMongooseRef('FavoriteGroup', true),
     listingId: String,
   },
   { timestamps: true },

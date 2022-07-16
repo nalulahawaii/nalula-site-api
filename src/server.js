@@ -1,6 +1,5 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import faveGroupRt from 'src/routes/favoriteGroup'
 import userRt from 'src/routes/user'
 import { newLogger } from 'src/services/logging'
 import { Db } from 'src/db/mongo/mongoose'
@@ -21,7 +20,6 @@ app.use(require('response-time')())
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use('/favoriteGroup', faveGroupRt)
 app.use('/user', userRt)
 
 if(app.get('env') === 'development') {
