@@ -63,7 +63,6 @@ const applyModifications = async (modifications, user) => {
           {
             new: true,
             upsert: true,
-            useFindAndModify: false,
             omitUndefined: true,
             lean: true,
           },
@@ -100,7 +99,6 @@ const applyModifications = async (modifications, user) => {
           {
             new: true,
             upsert: true,
-            useFindAndModify: false,
             omitUndefined: true,
             lean: true,
           },
@@ -136,7 +134,6 @@ const applyModifications = async (modifications, user) => {
           {
             new: true,
             upsert: true,
-            useFindAndModify: false,
             omitUndefined: true,
             lean: true,
           },
@@ -151,7 +148,6 @@ const applyModifications = async (modifications, user) => {
           {
             new: true,
             upsert: true,
-            useFindAndModify: false,
             omitUndefined: true,
             lean: true,
           },
@@ -180,7 +176,6 @@ const applyModifications = async (modifications, user) => {
           {
             new: true,
             upsert: true,
-            useFindAndModify: false,
             omitUndefined: true,
             lean: true,
           },
