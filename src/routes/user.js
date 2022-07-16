@@ -65,6 +65,7 @@ const applyModifications = async (modifications, user) => {
             new: true,
             upsert: true,
             omitUndefined: true,
+            useFindAndModify: false,
             lean: true,
           },
         )
@@ -77,6 +78,7 @@ const applyModifications = async (modifications, user) => {
           },
           {
             upsert: true,
+            useFindAndModify: false,
           })
       } else if(action === 'delete') {
         await Favorite.findByIdAndDelete(data._id, {
@@ -142,6 +144,7 @@ const applyModifications = async (modifications, user) => {
             new: true,
             upsert: true,
             omitUndefined: true,
+            useFindAndModify: false,
             lean: true,
           },
         )
