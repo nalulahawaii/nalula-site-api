@@ -4,20 +4,20 @@ import express from 'express'
 import User from 'src/db/mongo/models/user.mongo'
 import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
+import FavoriteState from 'src/db/mongo/models/favoriteState.mongo'
 import Message from 'src/db/mongo/models/message.mongo'
 import Search from 'src/db/mongo/models/search.mongo'
 import _ from 'lodash'
 import { getNowISO } from 'src/util/date'
-import {
-  sendError,
-  sendJson,
-} from 'src/util/http'
+import { sendError, sendJson } from 'src/util/http'
 import { newLogger } from 'src/services/logging'
 import { logValDetailed } from 'src/util/debug'
 
 const log = newLogger('User routes')
 
 const router = express.Router()
+
+const favoritesChangePaths = ['status', 'price', 'image_hashes', 'tour_url', 'tour_url2', 'tour_url3']
 
 const extractQuery = esQuery => esQuery.slice(1, esQuery.length - 1)
 
@@ -80,30 +80,18 @@ const applyModifications = async (modifications, user) => {
 
   if(modsByType.favorite) {
     promises = modsByType.favorite.map(async ({ action, data }) => {
-      if(action === 'insert') {
-        await Favorite.findOneAndUpdate(
-          {
-            listingId: data.listingId,
+      if(['insert', 'update'].includes(action)) {
+        const listingId = data.listingId
+        const filter = action === 'insert'
+          ? {
+            listingId,
             group: data.group,
-          },
-          {
-            ...data,
-            creator: user,
-            group: data.group || lastGroupUpdated?._id,
-          },
-          {
-            new: true,
-            upsert: true,
-            useFindAndModify: false,
-            omitUndefined: true,
-            lean: true,
-          },
-        )
-      } else if(action === 'update') {
-        await Favorite.findOneAndUpdate(
-          {
+          }
+          : {
             _id: data._id,
-          },
+          }
+        await Favorite.findOneAndUpdate(
+          filter,
           {
             ...data,
             creator: user,
@@ -117,6 +105,16 @@ const applyModifications = async (modifications, user) => {
             lean: true,
           },
         )
+        await FavoriteState.findOneAndUpdate({
+            listingId,
+          },
+          {
+            listingId,
+            ..._.pick(data, favoritesChangePaths),
+          },
+          {
+            upsert: true,
+          })
       } else if(action === 'delete') {
         await Favorite.findByIdAndDelete(data._id, {
           useFindAndModify: false,
