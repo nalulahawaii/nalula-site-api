@@ -1,14 +1,31 @@
 import Favorite from 'src/db/mongo/models/favorite.mongo'
 import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
+import tryToCatch from 'try-to-catch'
 import { newLogger } from 'src/services/logging'
 import { sendJson } from 'src/util/http'
+import { reportError } from '../util/error-handling'
 
 const log = newLogger('Favorite Group routes')
 
 const router = require('express').Router()
 
 router.get('/:id', async (req, res) => {
-  const favoriteGroup = await FavoriteGroup.findById(req.params.id)
+  const [favGrpErr, favoriteGroup] = await tryToCatch(FavoriteGroup.findById, req.params.id)
+  if(favGrpErr) {
+    reportError({
+      e: favGrpErr,
+      operation: 'retrieve favorite group',
+      extra: {
+        groupId: req.params.id,
+      },
+    })
+    return sendJson(res, {
+      favoriteGroup: {
+        favoriteIndices: [],
+      },
+      favorites: [],
+    })
+  }
   const favorites = favoriteGroup
     ? await Favorite.find({ group: favoriteGroup })
     : null

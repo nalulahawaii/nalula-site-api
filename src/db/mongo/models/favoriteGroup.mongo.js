@@ -1,7 +1,4 @@
-import {
-  model,
-  Schema,
-} from 'mongoose'
+import { model, Schema } from 'mongoose'
 import { getMongooseRef } from 'src/util/mongoose'
 
 const schema = new Schema(
@@ -14,4 +11,4 @@ const schema = new Schema(
 )
 
 schema.index({ creator: 1 })
-export default model('FavoriteGroup', schema)
+export default model('FavoriteGroup', schema, 'favorite-groups')
