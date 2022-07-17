@@ -1,5 +1,5 @@
 import { newLogger } from '../services/logging'
-import { sendJson } from 'src/util/http'
+import { sendJson } from 'util/http'
 import Favorite from 'db/mongo/models/favorite.mongo'
 
 const router = require('express').Router()

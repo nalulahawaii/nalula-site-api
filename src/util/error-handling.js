@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node'
-import { newLogger } from 'src/services/logging'
-import { logValDetailed } from 'src/util/debug'
+import { newLogger } from 'services/logging'
+import { logValDetailed } from 'util/debug'
 
 const log = newLogger('Development Error Logging', 'debug', 'debug')
 

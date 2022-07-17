@@ -19,7 +19,7 @@ class Db {
       useCreateIndex: true,
     })
 
-    const modelFiles = glob.sync('src/**/*.mongo.js')
+    const modelFiles = glob.sync('**/*.mongo.js')
 
     modelFiles.forEach((file) => {
       const filePath = path.join(root, '/', file)

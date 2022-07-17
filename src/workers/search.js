@@ -1,21 +1,14 @@
-import {
-  esBulk,
-  esClient,
-} from 'src/services/elasticsearch'
+import { esBulk, esClient } from 'services/elasticsearch'
 import esb from 'elastic-builder'
-import User from 'src/db/mongo/models/user.mongo'
-import Search from 'src/db/mongo/models/search.mongo'
-import Message from 'src/db/mongo/models/message.mongo'
-import { reportError } from 'src/util/error-handling'
-import { newLogger } from 'src/services/logging'
+import User from 'db/mongo/models/user.mongo'
+import Search from 'db/mongo/models/search.mongo'
+import Message from 'db/mongo/models/message.mongo'
+import { reportError } from 'util/error-handling'
+import { newLogger } from 'services/logging'
 import _ from 'lodash'
-import {
-  getNow,
-  getNowISO,
-  luxonDateTimeToISO,
-} from 'src/util/date'
-import { logValDetailed } from 'src/util/debug'
-import { sendEmail } from 'src/services/email'
+import { getNow, getNowISO, luxonDateTimeToISO } from 'util/date'
+import { logValDetailed } from 'util/debug'
+import { sendEmail } from 'services/email'
 import mongoose from 'mongoose'
 
 const log = newLogger('Searches Worker', 'debug', 'debug')

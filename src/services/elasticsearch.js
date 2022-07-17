@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch'
-import { newLogger } from 'src/services/logging'
-import { reportError } from 'src/util/error-handling'
+import { newLogger } from 'services/logging'
+import { reportError } from 'util/error-handling'
 
 const log = newLogger('ElasticSearch Client', 'debug', 'debug')
 

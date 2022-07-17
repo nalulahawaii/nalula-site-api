@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail'
-import { newLogger } from 'src/services/logging'
+import { newLogger } from 'services/logging'
 
 if(process.env.SENDGRID_API_KEY) sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 

@@ -1,16 +1,16 @@
-import { esBulk } from 'src/services/elasticsearch'
+import { esBulk } from 'services/elasticsearch'
 
 import express from 'express'
-import User from 'src/db/mongo/models/user.mongo'
-import Favorite from 'src/db/mongo/models/favorite.mongo'
-import FavoriteState from 'src/db/mongo/models/favoriteState.mongo'
-import Message from 'src/db/mongo/models/message.mongo'
-import Search from 'src/db/mongo/models/search.mongo'
+import User from 'db/mongo/models/user.mongo'
+import Favorite from 'db/mongo/models/favorite.mongo'
+import FavoriteState from 'db/mongo/models/favoriteState.mongo'
+import Message from 'db/mongo/models/message.mongo'
+import Search from 'db/mongo/models/search.mongo'
 import _ from 'lodash'
-import { getNowISO } from 'src/util/date'
-import { sendError, sendJson } from 'src/util/http'
-import { newLogger } from 'src/services/logging'
-import { logValDetailed } from 'src/util/debug'
+import { getNowISO } from 'util/date'
+import { sendError, sendJson } from 'util/http'
+import { newLogger } from 'services/logging'
+import { logValDetailed } from 'util/debug'
 
 const log = newLogger('User routes')
 

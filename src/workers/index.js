@@ -1,6 +1,6 @@
 import cron from 'node-cron'
 import _ from 'lodash'
-import { newLogger } from 'src/services/logging'
+import { newLogger } from 'services/logging'
 import searchConfig from './search'
 
 const configs = [searchConfig]

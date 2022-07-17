@@ -1,5 +1,7 @@
 {
-  "presets": ["@babel/preset-env"],
+  "presets": [
+    "@babel/preset-env"
+  ],
   "sourceMaps": true,
   "plugins": [
     "@babel/plugin-proposal-class-properties",
@@ -7,6 +9,9 @@
     [
       "module-resolver",
       {
+        "root": [
+          "./src"
+        ],
         "alias": {
           "src": "./src"
         }
@@ -15,7 +20,9 @@
   ],
   "env": {
     "test": {
-      "plugins": ["@babel/plugin-transform-runtime"]
+      "plugins": [
+        "@babel/plugin-transform-runtime"
+      ]
     }
   }
 }

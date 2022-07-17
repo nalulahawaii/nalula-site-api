@@ -1,8 +1,5 @@
-import {
-  model,
-  Schema,
-} from 'mongoose'
-import { getMongooseRef } from 'src/util/mongoose'
+import { model, Schema } from 'mongoose'
+import { getMongooseRef } from 'util/mongoose'
 
 const schema = Schema(
   {
