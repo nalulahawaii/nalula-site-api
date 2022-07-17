@@ -59,6 +59,7 @@ const applyModifications = async (modifications, user) => {
           filter,
           {
             ...data,
+            listingId,
             creator: user,
           },
           {
