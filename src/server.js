@@ -1,9 +1,10 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import userRt from 'src/routes/user'
-import { newLogger } from 'src/services/logging'
-import { Db } from 'src/db/mongo/mongoose'
-import { initWorkers } from 'src/workers'
+import favesRt from 'routes/favorites'
+import userRt from 'routes/user'
+import { newLogger } from 'services/logging'
+import { Db } from 'db/mongo/mongoose'
+import { initWorkers } from 'workers'
 
 const log = newLogger('Server')
 
@@ -20,6 +21,7 @@ app.use(require('response-time')())
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use('/favorites', favesRt)
 app.use('/user', userRt)
 
 if(app.get('env') === 'development') {
