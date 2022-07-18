@@ -22,6 +22,7 @@ app.use(require('response-time')())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/favorites', favesRt)
+app.use('/favoriteGroup', faveGroupRt)
 app.use('/user', userRt)
 
 if(app.get('env') === 'development') {

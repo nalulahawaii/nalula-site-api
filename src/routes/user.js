@@ -3,6 +3,7 @@ import { esBulk } from 'services/elasticsearch'
 import express from 'express'
 import User from 'db/mongo/models/user.mongo'
 import Favorite from 'db/mongo/models/favorite.mongo'
+import FavoriteGroup from 'db/mongo/models/favoriteGroup.mongo'
 import FavoriteState from 'db/mongo/models/favoriteState.mongo'
 import Message from 'db/mongo/models/message.mongo'
 import Search from 'db/mongo/models/search.mongo'
@@ -43,6 +44,38 @@ const applyModifications = async (modifications, user) => {
   log.debug('applyModifications', logValDetailed(modifications))
   let promises
   const modsByType = _.groupBy(modifications, 'type')
+  let lastGroupUpdated
+
+  if(modsByType.favoriteGroup) {
+    promises = modsByType.favoriteGroup.map(async ({ action, data }) => {
+      if(action === 'insert') {
+        lastGroupUpdated = await FavoriteGroup.create({
+          creator: user,
+          ...data,
+        })
+      } else if(action === 'update') {
+        lastGroupUpdated = await FavoriteGroup.findByIdAndUpdate(
+          data._id,
+          {
+            ...data,
+            creator: user,
+          },
+          {
+            new: true,
+            upsert: true,
+            omitUndefined: true,
+            lean: true,
+          },
+        )
+      } else if(action === 'delete') {
+        const group = await FavoriteGroup.findByIdAndDelete(data._id, {
+          useFindAndModify: false,
+        })
+        await Favorite.deleteMany({ group })
+      }
+    })
+    await Promise.all(promises)
+  }
 
   if(modsByType.favorite) {
     promises = modsByType.favorite.map(async ({ action, data }) => {
@@ -51,6 +84,7 @@ const applyModifications = async (modifications, user) => {
         const filter = action === 'insert'
           ? {
             listingId,
+            group: data.group,
           }
           : {
             _id: data._id,
@@ -61,6 +95,7 @@ const applyModifications = async (modifications, user) => {
             ...data,
             listingId,
             creator: user,
+            group: data.group || lastGroupUpdated?._id,
           },
           {
             new: true,
@@ -174,6 +209,10 @@ router.post('/', async (req, res) => {
   let user = await User.findOne({ sub: body.user.sub })
   if(!user) {
     user = await User.create({ ...body.user })
+    await FavoriteGroup.create({
+      creator: user,
+      name: 'Favorites',
+    })
   } else {
     user.loginCount = body.user.loginCount
     user.email_verified = body.user.email_verified || 'false'
@@ -181,14 +220,24 @@ router.post('/', async (req, res) => {
   }
   await applyModifications(body.modifications, user)
   const favorites = await Favorite.find({ creator: user })
+  const favGroups = await FavoriteGroup.find({ creator: user })
   const incomingMessages = await Message.find({
     receiver: user,
     viewDate: null,
   })
   const savedSearches = await Search.find({ creator: user })
+  const favoriteGroups = favGroups.map((favGroup) => ({
+    ...favGroup._doc,
+    favoriteIndices: favorites
+      .map((fav, i) => fav.group && fav.group === favGroup
+        ? i
+        : null)
+      .filter((idx) => idx !== null),
+  }))
   sendJson(res, {
     user,
     favorites,
+    favoriteGroups,
     incomingMessages,
     savedSearches,
   })
@@ -203,6 +252,7 @@ router.delete('/:id', async (req, res) => {
   const {
     params: { id },
   } = req
+  await FavoriteGroup.deleteMany({ creator: id })
   await Favorite.deleteMany({ creator: id })
   const users = await User.findByIdAndDelete(id)
 
