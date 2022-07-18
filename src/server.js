@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import favesRt from 'routes/favorites'
+import faveGroupRt from 'routes/favoriteGroup'
 import userRt from 'routes/user'
 import { newLogger } from 'services/logging'
 import { Db } from 'db/mongo/mongoose'

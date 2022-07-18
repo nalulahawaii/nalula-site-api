@@ -1,8 +1,8 @@
-import Favorite from 'src/db/mongo/models/favorite.mongo'
-import FavoriteGroup from 'src/db/mongo/models/favoriteGroup.mongo'
+import Favorite from 'db/mongo/models/favorite.mongo'
+import FavoriteGroup from 'db/mongo/models/favoriteGroup.mongo'
 import tryToCatch from 'try-to-catch'
-import { newLogger } from 'src/services/logging'
-import { sendJson } from 'src/util/http'
+import { newLogger } from 'services/logging'
+import { sendJson } from 'util/http'
 import { reportError } from '../util/error-handling'
 
 const log = newLogger('Favorite Group routes')
